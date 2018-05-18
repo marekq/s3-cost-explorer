@@ -1,0 +1,36 @@
+﻿AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+
+  costreport:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.6
+      CodeUri: s3://marek-serverless/costreport.zip
+      Description: 'lambda to retrieve cost reports'
+      MemorySize: 128
+      Timeout: 300
+      Environment:
+        Variables:
+          bucket: !Ref Bucket
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action: 'ce:*'
+            Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action: 's3:PutObject'
+            Resource: !Sub "arn:aws:s3:::${Bucket}/*"
+
+Outputs:
+  BucketName:
+    Description: Bucket Name
+    Value: !Ref Bucket
