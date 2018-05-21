@@ -2,6 +2,15 @@
 Transform: 'AWS::Serverless-2016-10-31'
 Description: An AWS Serverless Specification template describing your function.
 
+Parameters:
+  toemail:
+    Type: String
+    Description: to email address
+
+  fromemail:
+    Type: String
+    Description: from email address
+
 Resources:
   Bucket:
     Type: AWS::S3::Bucket
@@ -18,6 +27,13 @@ Resources:
       Environment:
         Variables:
           bucket: !Ref Bucket
+          to_email: !Ref toemail
+          from_email: !Ref toemail
+      Events:
+        SendAt4AM:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 4 * * ? *)
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -29,8 +45,16 @@ Resources:
             Effect: Allow
             Action: 's3:PutObject'
             Resource: !Sub "arn:aws:s3:::${Bucket}/*"
+        - Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action: 'ses:*'
+            Resource: '*'
 
 Outputs:
   BucketName:
     Description: Bucket Name
     Value: !Ref Bucket
+  Notifications:
+    Description: Report Email Address
+    Value: !Ref toemail
